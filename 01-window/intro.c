@@ -1,0 +1,52 @@
+#include <windows.h>
+#include <gl/GL.h>
+
+#define WIDTH 1920
+#define HEIGHT 1080
+
+#define WNDCLASS_STATIC 0xC019 
+
+static const PIXELFORMATDESCRIPTOR kPfd = {
+	.nSize = sizeof(kPfd),
+	.dwFlags = PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
+	.iPixelType = PFD_TYPE_RGBA,
+	.cColorBits = 24,
+};
+
+#ifdef COMPRESSED
+int WinMainCRTStartup(void) {
+#else
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nShowCmd) {
+	(void)hInstance; (void)hPrevInstance; (void)pCmdLine; (void)nShowCmd;
+#endif
+
+	const HWND hwnd = CreateWindowExA(
+		0, // window styles
+		(void*)WNDCLASS_STATIC,
+		"intro", // title
+		WS_POPUP | WS_VISIBLE,
+		0, 0, WIDTH, HEIGHT,
+		NULL, NULL, NULL, NULL
+	);
+
+	const HDC hdc = GetDC(hwnd);
+	SetPixelFormat(hdc, ChoosePixelFormat(hdc, &kPfd), &kPfd);
+	const HGLRC hglrc = wglCreateContext(hdc);
+	wglMakeCurrent(hdc, hglrc);
+
+	glViewport(0, 0, WIDTH, HEIGHT);
+	glClearColor(255, 0, 0, 0);
+
+	ShowCursor(FALSE);
+
+	for (;;) {
+		if (GetAsyncKeyState(VK_ESCAPE))
+			break;
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		SwapBuffers(hdc);
+		PeekMessageA(NULL, 0, 0, 0, PM_REMOVE);
+	}
+
+	return 0;
+}
