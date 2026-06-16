@@ -1,0 +1,26 @@
+- [x] 01 empty and compressed
+    - [ ] slides
+- [x] 02 empty window with GL context
+    - [ ] slides
+- [ ] 03 fullscreen shader
+    - [ ] load functions
+    - [ ] create program
+    - [ ] draw
+    - [ ] pass time
+    - [ ] slides
+- [ ] 04 shader minifier
+    - [ ] read from file
+    - [ ] debug messages
+    - [ ] slides
+- [ ] music
+    - [ ] compile and link with sointu
+    - [ ] start thread and playback
+    - [ ] read time from waveout
+    - [ ] slides
+- [ ] bigger shader
+- [ ] more tricks and further work
+
+- [ ] list dependencies:
+    - [ ] crinkler
+    - [ ] shader minifier
+    - [ ] sointu
