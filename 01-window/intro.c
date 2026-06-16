@@ -20,11 +20,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 	(void)hInstance; (void)hPrevInstance; (void)pCmdLine; (void)nShowCmd;
 #endif
 
-	const HWND hwnd = CreateWindowExA(
-		0, // window styles
+	const HWND hwnd = CreateWindowA(
 		(void*)WNDCLASS_STATIC,
 		"intro", // title
-		WS_POPUP | WS_VISIBLE,
+		WS_POPUP | WS_VISIBLE, // style
 		0, 0, WIDTH, HEIGHT,
 		NULL, NULL, NULL, NULL
 	);
@@ -48,5 +47,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 		PeekMessageA(NULL, 0, 0, 0, PM_REMOVE);
 	}
 
-	return 0;
+	ExitProcess(0);
 }
