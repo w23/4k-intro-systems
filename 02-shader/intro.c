@@ -9,6 +9,7 @@
 // glext.h definitions
 #define GL_FRAGMENT_SHADER                0x8B30
 #define GL_COMPILE_STATUS                 0x8B81
+
 typedef char GLchar;
 typedef void (APIENTRY *PFNGLATTACHSHADERPROC) (GLuint program, GLuint shader);
 typedef void (APIENTRY *PFNGLCOMPILESHADERPROC) (GLuint shader);
@@ -20,6 +21,8 @@ typedef void (APIENTRY *PFNGLLINKPROGRAMPROC) (GLuint program);
 typedef void (APIENTRY *PFNGLUSEPROGRAMPROC) (GLuint program);
 typedef void (APIENTRY *PFNGLSHADERSOURCEPROC) (GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length);
 typedef GLuint (APIENTRY *PFNGLCREATESHADERPROGRAMVPROC) (GLenum type, GLsizei count, const GLchar *const*strings);
+typedef GLint (APIENTRY *PFNGLGETUNIFORMLOCATIONPROC) (GLuint program, const GLchar *name);
+typedef void (APIENTRY *PFNGLUNIFORM1FPROC) (GLint location, GLfloat v0);
 
 #if COMPRESSED
 #define LIST_SHADER_GL_FUNCS(X) \
@@ -38,9 +41,11 @@ typedef GLuint (APIENTRY *PFNGLCREATESHADERPROGRAMVPROC) (GLenum type, GLsizei c
 
 #define LIST_GL_FUNCS(X) \
 	LIST_SHADER_GL_FUNCS(X) \
+	X(PFNGLGETUNIFORMLOCATIONPROC, glGetUniformLocation) \
+	X(PFNGLUNIFORM1FPROC, glUniform1f) \
 	X(PFNGLUSEPROGRAMPROC, glUseProgram) \
 
-#define X(t, n) static t n = NULL;
+#define X(t, n) static t n;
 LIST_GL_FUNCS(X)
 #undef X
 
@@ -64,7 +69,8 @@ static const PIXELFORMATDESCRIPTOR kPfd = {
 };
 
 static const char *shader_source =
-"void main() { gl_FragColor = vec4(0., 1., 0., 0.); }";
+"uniform float t;\n"
+"void main() { gl_FragColor = vec4(0., 1., .5 + .5 * sin(t), 0.); }";
 
 #ifdef COMPRESSED
 int WinMainCRTStartup(void) {
@@ -114,11 +120,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 	}
 #endif
 	glUseProgram(program);
+	const GLint t_loc = glGetUniformLocation(program, "t");
 
 	for (;;) {
 		if (GetAsyncKeyState(VK_ESCAPE))
 			break;
 
+		glUniform1f(t_loc, GetTickCount() / 1000.0f);
 		glRects(-1, -1, 1, 1);
 		SwapBuffers(hdc);
 		PeekMessageA(NULL, 0, 0, 0, PM_REMOVE);
