@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+		/>
+
+		<title>TBD making a 4k intro</title>
+
+		<link rel="stylesheet" href="dist/reset.css" />
+		<link rel="stylesheet" href="dist/reveal.css" />
+		<link rel="stylesheet" href="dist/theme/black.css" />
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="dist/plugin/highlight/monokai.css" />
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-markdown data-separator-vertical="-v-">
+					<textarea data-template>
+# Making your own 4k intro
+from scratch
+
+No frameworks, no registration, no cloud subscriptions <!-- .element: class="fragment" -->
+-v-
+
+## Who am I?
+- provod of jetlag
+- made dozens of 4k intros
+- built multiple different frameworks and tools
+---
+
+## Theory
+- Single 32 bit exe file for Microsoft:tm: Windows:r:
+- No assets, no dependencies
+- Only uses what default Windows installation has
+-v-
+
+## Code
+- OpenGL 2.0 window
+- Fullscreen GLSL fragment shader
+- Background `sointu` audio thread
+- `waveOut` for audio FIXME
+- Exit on ESC or after N seconds
+- Use only what's strictly necessary
+- Cut corners agressively
+- No error checking!
+-v-
+
+## Build
+- Visual Studio Build Tools
+- [Shader minifier](https://github.com/laurentlb/shader-minifier) for GLSL minification
+- `cl.exe /Os intro.c`
+- `nasm sointu.asm` FIXME
+- [Crinkler](https://github.com/runestubbe/Crinkler) for linking and compression
+-v-
+
+## Typical space budget
+- 2k visuals
+	- 500-800 bytes: systems
+		- 400: header, decompressor, linking
+		- 200: window, OpenGL context, shader program
+		- 100: audio thread, output, sync
+	- 1-1.5k: compressed minified shader
+- 2k music
+	- 1k: synth engine
+	- 100 bytes per instrument
+	- 200-500 bytes sequencer
+---
+## Basic build system
+How big is the empty exe?
+
+`intro.c` <!-- .element: class="fragment" data-fragment-index="1" -->
+```c
+#include <windows.h>
+
+int WINAPI WinMain(HINSTANCE hInstance,
+	HINSTANCE hPrevInstance,
+	LPSTR pCmdLine,
+	int nShowCmd) {
+	return 0;
+}
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+`build.bat` <!-- .element: class="fragment" data-fragment-index="2" -->
+```bat
+cl /Feintro.exe intro.c /link /subsystem:windows
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+### 85 kilobytes! <!-- .element: class="fragment" -->
+-v-
+
+## Compressed and optimized
+No C library, and using Crinkler
+
+`intro.c`
+```c
+#include <windows.h>
+
+int WinMainCRTStartup(void) {
+	ExitProcess(0); // Needed to terminate the process
+}
+```
+
+`build.bat`
+```bat
+call cl %CFLAGS% intro.c
+call .\crinkler.exe /subsystem:windows /OUT:intro.exe /CRINKLER
+
+```
+### Just FIXME bytes!
+---
+
+## Making a window
+Use hardcoded `WNDCLASS`
+
+`CreateWindow`
+-v-
+
+## Fullscreen
+TBD
+-v-
+
+## Initializing OpenGL
+- TBD pixelformatdesc
+- wglCreate
+-v-
+
+## Clear to solid color
+-v-
+
+## Event loop
+-v-
+
+## Linking
+-v-
+
+TBD Screenshot and bytes
+---
+
+## Loading shader program
+TBD define shader
+TBD two functions
+TBD glRects
+-v-
+
+## Extra loading
+Windows only supports OpenGL 1.1
+
+Anything newer needs to be defined and loaded
+
+TBD
+-v-
+
+TBD Screenshot and bytes
+-v-
+## Pass time
+TBD uniforms
+---
+
+## Use real shader
+TBD make a good example
+TBD how many bytes?! Remember audio budget?
+TBD report screenshot
+
+-v-
+## Enter the Shader Minifier
+TBD get it
+TBD build step
+TBD #include
+
+-v-
+## Minified
+TBD what it looks like
+TBD size
+---
+## Musics
+TBD sointu, assets, build step
+TBD create thread
+-v-
+
+## waveOut
+TBD struct, create, start
+-v-
+
+## Time in ticks
+lyme tick.jpg
+TBD size
+
+-v-
+Demo time
+---
+
+## TBD further notes
+TBD
+- slow mode, extra flags
+- section reordering
+- extra compiler args
+---
+
+## Extras: Live shader loading
+TBD file reading, shader info log, etc
+---
+
+## Extras: Alternatives
+- Pure assembly, no MSVC, framework: [BEPCT4k](https://github.com/w23/bepct4k)
+	- Used in one form or another in all jetlag 4k intros since ~2019
+- Music:
+	- 4klang (where sointu forked off)
+	- oidos
+	- clinkster
+	- ...
+
+					</textarea>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="dist/plugin/notes.js"></script>
+		<script src="dist/plugin/markdown.js"></script>
+		<script src="dist/plugin/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+			});
+		</script>
+	</body>
+</html>
