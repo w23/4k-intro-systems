@@ -3,9 +3,9 @@
 - [x] 02 empty window with GL context
     - [ ] slides
 - [ ] 03 fullscreen shader
-    - [ ] load functions
-    - [ ] create program
-    - [ ] draw
+    - [x] load functions
+    - [x] create program
+    - [x] draw
     - [ ] pass time
     - [ ] slides
 - [ ] 04 shader minifier
