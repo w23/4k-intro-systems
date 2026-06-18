@@ -229,18 +229,33 @@ static const DEVMODEA devmode = {
 <!-- .element: class="fragment" -->
 ---
 
-## Loading shader program
-TBD define shader
-TBD two functions
-TBD glRects
+## Shader program
+Single fullscreen fragment shader
+Agenda:
+- Specify GLSL source as a string
+- Compile them into GL program object
+- Use program
+- Draw fullscreen quad
+- ?????
+- ❌
+<!-- .element: class="fragment" -->
+```
+error LNK: Cannot find symbol '_glUseProgram'
+```
+<!-- .element: class="fragment" -->
+
+-v-
+## 
+- Windows only supports OpenGL 1.1
+- Shaders are OpenGL 2.0
+- Need to manually load missing functions
+- Anything newer needs to be defined and loaded
+- `wglGetProcAddress("glUseProgram");`
 -v-
 
-## Extra loading
-Windows only supports OpenGL 1.1
+TBD LOADING
+-v-
 
-Anything newer needs to be defined and loaded
-
-TBD
 -v-
 
 TBD Screenshot and bytes

@@ -68,21 +68,29 @@ static const PIXELFORMATDESCRIPTOR kPfd = {
 	.cColorBits = 24,
 };
 
+static const DEVMODEA devmode = {
+	.dmSize = sizeof(devmode),
+	.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL,
+	.dmBitsPerPel = 32,
+	.dmPelsWidth = WIDTH,
+	.dmPelsHeight = HEIGHT,
+};
+
 static const char *shader_source =
 "uniform float t;\n"
 "void main() { gl_FragColor = vec4(0., 1., .5 + .5 * sin(t), 0.); }";
 
-#ifdef COMPRESSED
-int WinMainCRTStartup(void) {
-#else
+#ifdef _DEBUG
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nShowCmd) {
 	(void)hInstance; (void)hPrevInstance; (void)pCmdLine; (void)nShowCmd;
+#else
+int WinMainCRTStartup(void) {
 #endif
 
 	ShowCursor(FALSE);
+	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
 
-	const HWND hwnd = CreateWindowExA(
-		0, // window styles
+	const HWND hwnd = CreateWindowA(
 		(void*)WNDCLASS_STATIC,
 		"intro", // title
 		WS_POPUP | WS_VISIBLE,
@@ -99,7 +107,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 
 	glViewport(0, 0, WIDTH, HEIGHT);
 
-#ifdef COMPRESSED
+#ifndef _DEBUG
 	const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_source);
 #else
 	const GLint program = glCreateProgram();
@@ -129,6 +137,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 		glUniform1f(t_loc, GetTickCount() / 1000.0f);
 		glRects(-1, -1, 1, 1);
 		SwapBuffers(hdc);
+
+		// Pump messages to tell Windows we're alive
 		PeekMessageA(NULL, 0, 0, 0, PM_REMOVE);
 	}
 
