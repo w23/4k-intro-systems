@@ -317,17 +317,20 @@ static const char *shader_source =
 
 Locate
 <!-- .element: class="fragment" data-fragment-index="2" -->
-```c++ [3]
+```c++ [3-5]
 glUseProgram(program);
 
 const GLint t_loc = glGetUniformLocation(program, "t");
+
+const DWORD time_began = GetTickCount();
+for (;;) {
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Set to current time in float seconds
 <!-- .element: class="fragment" data-fragment-index="3" -->
 ```c++ [1]
-glUniform1f(t_loc, GetTickCount() / 1000.f);
+glUniform1f(t_loc, (GetTickCount() - time_began) / 1000.f);
 glRects(-1, -1, 1, 1);
 ```
 <!-- .element: class="fragment" data-fragment-index="3" -->
@@ -351,7 +354,7 @@ glUseProgram = (void*)wglGetProcAddress("glUseProgram");
 glGetUniformLocation = (void*)wglGetProcAddress("glGetUniformLocation");
 glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 ```
-### 833 bytes <!-- .element: class="fragment" -->
+### 843 bytes <!-- .element: class="fragment" -->
 ---
 
 ## Use real shader

@@ -67,11 +67,12 @@ int WinMainCRTStartup(void) {
 
 	const GLint t_loc = glGetUniformLocation(program, "t");
 
+	const DWORD time_began = GetTickCount();
 	for (;;) {
 		if (GetAsyncKeyState(VK_ESCAPE))
 			break;
 
-		glUniform1f(t_loc, GetTickCount() / 1000.f);
+		glUniform1f(t_loc, (GetTickCount() - time_began) / 1000.f);
 		glRects(-1, -1, 1, 1);
 		SwapBuffers(hdc);
 
