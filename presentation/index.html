@@ -24,38 +24,50 @@
 # Making your own 4k intro
 from scratch
 
-No frameworks, no registration, no cloud subscriptions <!-- .element: class="fragment" -->
+No frameworks, no registration, no cloud subscriptions, no AI <!-- .element: class="fragment" -->
 -v-
 
 ## Who am I?
 - provod of jetlag
 - made dozens of 4k intros
 - built multiple different frameworks and tools
+- still have no idea what I'm talking about <!-- .element: class="fragment" -->
+-v-
+
+## Agenda
+This is a serious engineering talk
+- We will not talk about art <!-- .element: class="fragment" -->
+	- Plenty of other materials about shaders, SDF raymarching and other tricks
+	- Some materials about making music
+- We'll talk systems <!-- .element: class="fragment" -->
+	- How to initialize and run things
+	- How to build and compress executable file
 ---
 
 ## Theory
 - Single 32 bit exe file for Microsoft:tm: Windows:r:
-- No assets, no dependencies
+- No assets, no third party dependencies
 - Only uses what default Windows installation has
 -v-
 
-## Code
+## Code overview
 - OpenGL 2.0 window
 - Fullscreen GLSL fragment shader
-- Background `sointu` audio thread
-- `waveOut` for audio FIXME
+- Background `sointu`/`4klang` audio thread
+- `waveOut` for audio
 - Exit on ESC or after N seconds
 - Use only what's strictly necessary
 - Cut corners agressively
-- No error checking!
+- Feeling lucky: no error checking whatsoever! <!-- .element: class="fragment" -->
 -v-
 
-## Build
+## Build overview
 - Visual Studio Build Tools
-- [Shader minifier](https://github.com/laurentlb/shader-minifier) for GLSL minification
-- `cl.exe /Os intro.c`
-- `nasm sointu.asm` FIXME
-- [Crinkler](https://github.com/runestubbe/Crinkler) for linking and compression
+- `build.bat` file with
+	- [Shader minifier](https://github.com/laurentlb/shader-minifier) for GLSL minification
+	- `cl.exe /Os intro.c`
+	- `nasm sointu.asm` TBD
+	- [Crinkler](https://github.com/runestubbe/Crinkler) for linking and compression
 -v-
 
 ## Typical space budget
@@ -73,7 +85,7 @@ No frameworks, no registration, no cloud subscriptions <!-- .element: class="fra
 ## Basic build system
 How big is the empty exe?
 
-`intro.c` <!-- .element: class="fragment" data-fragment-index="1" -->
+`empty.c` <!-- .element: class="fragment" data-fragment-index="1" -->
 ```c
 #include <windows.h>
 
@@ -98,7 +110,7 @@ cl /Feintro.exe intro.c /link /subsystem:windows
 ## Compressed and optimized
 No C library, and using Crinkler
 
-`intro.c`
+`empty-nocrt.c` <!-- .element: class="fragment" data-fragment-index="1" -->
 ```c
 #include <windows.h>
 
@@ -106,24 +118,38 @@ int WinMainCRTStartup(void) {
 	ExitProcess(0); // Needed to terminate the process
 }
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
-`build.bat`
+`build-compress.bat` <!-- .element: class="fragment" data-fragment-index="2" -->
 ```bat
-call cl %CFLAGS% intro.c
-call .\crinkler.exe /subsystem:windows /OUT:intro.exe /CRINKLER
-
+cl %CFLAGS% intro.c
+.\crinkler.exe /subsystem:windows /OUT:intro.exe /CRINKLER
 ```
-### Just FIXME bytes!
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+### Just TBD bytes! <!-- .element: class="fragment" -->
 ---
 
 ## Making a window
-Use hardcoded `WNDCLASS`
+```c
+#define WIDTH 1920
+#define HEIGHT 1080
 
-`CreateWindow`
--v-
+// Saves *dozens* of bytes on class reg and wndproc
+#define WNDCLASS_STATIC 0xC019
+```
+<!-- .element: class="fragment" -->
 
-## Fullscreen
-TBD
+```c
+const HWND hwnd = CreateWindowA(
+	(void*)WNDCLASS_STATIC,
+	"intro", // title
+	WS_POPUP | WS_VISIBLE, // style
+	0, 0, WIDTH, HEIGHT,
+	NULL, NULL, NULL, NULL
+);
+```
+<!-- .element: class="fragment" -->
 -v-
 
 ## Initializing OpenGL
@@ -138,9 +164,12 @@ TBD
 -v-
 
 ## Linking
+TBD Screenshot and bytes
 -v-
 
-TBD Screenshot and bytes
+## Fullscreen
+TBD
+TBD and bytes
 ---
 
 ## Loading shader program
