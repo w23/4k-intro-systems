@@ -13,12 +13,23 @@ static const PIXELFORMATDESCRIPTOR kPfd = {
 	.cColorBits = 24,
 };
 
+static const DEVMODEA devmode = {
+	.dmSize = sizeof(devmode),
+	.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL,
+	.dmBitsPerPel = 32,
+	.dmPelsWidth = WIDTH,
+	.dmPelsHeight = HEIGHT,
+};
+
 #ifdef COMPRESSED
 int WinMainCRTStartup(void) {
 #else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nShowCmd) {
 	(void)hInstance; (void)hPrevInstance; (void)pCmdLine; (void)nShowCmd;
 #endif
+
+	ShowCursor(FALSE);
+	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
 
 	const HWND hwnd = CreateWindowA(
 		(void*)WNDCLASS_STATIC,
@@ -35,8 +46,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glClearColor(255, 0, 0, 0);
-
-	ShowCursor(FALSE);
 
 	for (;;) {
 		if (GetAsyncKeyState(VK_ESCAPE))
