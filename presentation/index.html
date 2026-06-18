@@ -86,7 +86,7 @@ This is a serious engineering talk
 How big is the empty exe?
 
 `empty.c` <!-- .element: class="fragment" data-fragment-index="1" -->
-```c
+```c++
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE hInstance,
@@ -111,7 +111,7 @@ cl /Feintro.exe intro.c /link /subsystem:windows
 No C library, and using Crinkler
 
 `empty-nocrt.c` <!-- .element: class="fragment" data-fragment-index="1" -->
-```c
+```c++
 #include <windows.h>
 
 int WinMainCRTStartup(void) {
@@ -131,7 +131,7 @@ cl %CFLAGS% intro.c
 ---
 
 ## Making a window
-```c
+```c++
 #define WIDTH 1920
 #define HEIGHT 1080
 
@@ -140,7 +140,7 @@ cl %CFLAGS% intro.c
 ```
 <!-- .element: class="fragment" -->
 
-```c
+```c++
 const HWND hwnd = CreateWindowA(
 	(void*)WNDCLASS_STATIC,
 	"intro", // title
@@ -153,22 +153,70 @@ const HWND hwnd = CreateWindowA(
 -v-
 
 ## Initializing OpenGL
-- TBD pixelformatdesc
-- wglCreate
+```c++
+static const PIXELFORMATDESCRIPTOR kPfd = {
+	.nSize = sizeof(kPfd),
+	.dwFlags = PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
+	.iPixelType = PFD_TYPE_RGBA,
+	.cColorBits = 24,
+};
+```
+
+```c++
+	const HDC hdc = GetDC(hwnd);
+	SetPixelFormat(hdc, ChoosePixelFormat(hdc, &kPfd), &kPfd);
+	const HGLRC hglrc = wglCreateContext(hdc);
+	wglMakeCurrent(hdc, hglrc);
+```
+
+We have a current OpenGL 2.0 context now
 -v-
 
-## Clear to solid color
--v-
+## Event and paint loop
+```c++
+// Clear to solid red color to check that it works
+glClearColor(255, 0, 0, 0);
 
-## Event loop
+for (;;) {
+	if (GetAsyncKeyState(VK_ESCAPE))
+		break;
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	SwapBuffers(hdc);
+
+	// Pump messages to tell Windows we're alive
+	PeekMessageA(NULL, 0, 0, 0, PM_REMOVE);
+}
+```
 -v-
 
 ## Linking
+TBD
+```bat
+set CFLAGS=/nologo /DCOMPRESSED
+set LDFLAGS=/subsystem:windows /OUT:intro-compressed.exe /CRINKLER
+
+call cl %CFLAGS% intro.c
+call ..\crinkler.exe %LDFLAGS% intro.obj kernel32.lib user32.lib opengl32.lib gdi32.lib
+```
 TBD Screenshot and bytes
 -v-
 
 ## Fullscreen
-TBD
+```c++
+static const DEVMODEA devmode = {
+	.dmSize = sizeof(devmode),
+	.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL,
+	.dmBitsPerPel = 32,
+	.dmPelsWidth = WIDTH,
+	.dmPelsHeight = HEIGHT,
+};
+```
+
+```c++
+	ShowCursor(FALSE);
+	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
+```
 TBD and bytes
 ---
 
