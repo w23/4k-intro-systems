@@ -45,7 +45,7 @@ This is a serious engineering talk
 ---
 
 ## Theory
-- Single 32 bit exe file for Microsoft:tm: Windows:r:
+- Single 32 bit exe file for Microsoft™ Windows®
 - No assets, no third party dependencies
 - Only uses what default Windows installation has
 -v-
@@ -100,11 +100,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 `build.bat` <!-- .element: class="fragment" data-fragment-index="2" -->
 ```bat
-cl /Feintro.exe intro.c /link /subsystem:windows
+cl /Feempty.exe empty.c /link /subsystem:windows
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
-### 85 kilobytes! <!-- .element: class="fragment" -->
+### 84 kilobytes! <!-- .element: class="fragment" -->
 -v-
 
 ## Compressed and optimized
@@ -122,12 +122,14 @@ int WinMainCRTStartup(void) {
 
 `build-compress.bat` <!-- .element: class="fragment" data-fragment-index="2" -->
 ```bat
-cl %CFLAGS% intro.c
-.\crinkler.exe /subsystem:windows /OUT:intro.exe /CRINKLER
+cl empty-nocrt.c
+..\crinkler.exe ^
+	empty-nocrt.obj kernel32.lib user32.lib ^
+	/subsystem:windows /OUT:compressed.exe /CRINKLER
 ```
 <!-- .element: class="fragment" data-fragment-index="2" -->
 
-### Just TBD bytes! <!-- .element: class="fragment" -->
+### Just 433 bytes! <!-- .element: class="fragment" -->
 ---
 
 ## Making a window

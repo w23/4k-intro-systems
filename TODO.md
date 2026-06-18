@@ -1,7 +1,7 @@
-- [ ] 01 empty and compressed
+- [x] 00 empty and compressed
     - [x] base
-    - [ ] slides
-- [ ] 02 empty window with GL context
+    - [x] slides
+- [ ] 01 empty window with GL context
     - [x] base
     - [ ] fullscreen
     - [ ] slides
