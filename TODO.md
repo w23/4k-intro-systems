@@ -1,11 +1,11 @@
 - [x] 00 empty and compressed
     - [x] base
     - [x] slides
-- [ ] 01 empty window with GL context
+- [x] 01 empty window with GL context
     - [x] base
-    - [ ] fullscreen
-    - [ ] slides
-- [ ] 03 fullscreen shader
+    - [x] fullscreen
+    - [x] slides
+- [ ] 02 fullscreen shader
     - [x] load functions
     - [x] create program
     - [x] draw

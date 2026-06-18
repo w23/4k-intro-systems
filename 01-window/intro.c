@@ -21,11 +21,11 @@ static const DEVMODEA devmode = {
 	.dmPelsHeight = HEIGHT,
 };
 
-#ifdef COMPRESSED
-int WinMainCRTStartup(void) {
-#else
+#ifdef _DEBUG
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nShowCmd) {
 	(void)hInstance; (void)hPrevInstance; (void)pCmdLine; (void)nShowCmd;
+#else
+int WinMainCRTStartup(void) {
 #endif
 
 	ShowCursor(FALSE);
@@ -41,10 +41,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 
 	const HDC hdc = GetDC(hwnd);
 	SetPixelFormat(hdc, ChoosePixelFormat(hdc, &kPfd), &kPfd);
-	const HGLRC hglrc = wglCreateContext(hdc);
-	wglMakeCurrent(hdc, hglrc);
+	wglMakeCurrent(hdc, wglCreateContext(hdc));
 
-	glViewport(0, 0, WIDTH, HEIGHT);
+	// Clear to solid red color to check that it works
 	glClearColor(255, 0, 0, 0);
 
 	for (;;) {
@@ -53,6 +52,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine,
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		SwapBuffers(hdc);
+
+		// Pump messages to tell Windows we're alive
 		PeekMessageA(NULL, 0, 0, 0, PM_REMOVE);
 	}
 

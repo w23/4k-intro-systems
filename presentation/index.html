@@ -123,6 +123,7 @@ int WinMainCRTStartup(void) {
 `build-compress.bat` <!-- .element: class="fragment" data-fragment-index="2" -->
 ```bat
 cl empty-nocrt.c
+
 ..\crinkler.exe ^
 	empty-nocrt.obj kernel32.lib user32.lib ^
 	/subsystem:windows /OUT:compressed.exe /CRINKLER
@@ -158,17 +159,17 @@ const HWND hwnd = CreateWindowA(
 ```c++
 static const PIXELFORMATDESCRIPTOR kPfd = {
 	.nSize = sizeof(kPfd),
-	.dwFlags = PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
+	.dwFlags =
+		PFD_DOUBLEBUFFER | PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL,
 	.iPixelType = PFD_TYPE_RGBA,
 	.cColorBits = 24,
 };
 ```
 
 ```c++
-	const HDC hdc = GetDC(hwnd);
-	SetPixelFormat(hdc, ChoosePixelFormat(hdc, &kPfd), &kPfd);
-	const HGLRC hglrc = wglCreateContext(hdc);
-	wglMakeCurrent(hdc, hglrc);
+const HDC hdc = GetDC(hwnd);
+SetPixelFormat(hdc, ChoosePixelFormat(hdc, &kPfd), &kPfd);
+wglMakeCurrent(hdc, wglCreateContext(hdc));
 ```
 
 We have a current OpenGL 2.0 context now
@@ -192,16 +193,20 @@ for (;;) {
 ```
 -v-
 
-## Linking
-TBD
-```bat
-set CFLAGS=/nologo /DCOMPRESSED
-set LDFLAGS=/subsystem:windows /OUT:intro-compressed.exe /CRINKLER
+## Building
+`build.bat`
 
-call cl %CFLAGS% intro.c
-call ..\crinkler.exe %LDFLAGS% intro.obj kernel32.lib user32.lib opengl32.lib gdi32.lib
+```bat
+cl intro.c
+
+..\crinkler.exe ^
+	intro.obj ^
+	kernel32.lib user32.lib opengl32.lib gdi32.lib ^
+	/subsystem:windows /OUT:intro.exe /CRINKLER
 ```
-TBD Screenshot and bytes
+
+618 bytes for a solid red color
+<!-- .element: class="fragment" -->
 -v-
 
 ## Fullscreen
@@ -219,7 +224,9 @@ static const DEVMODEA devmode = {
 	ShowCursor(FALSE);
 	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
 ```
-TBD and bytes
+
+647 bytes
+<!-- .element: class="fragment" -->
 ---
 
 ## Loading shader program
