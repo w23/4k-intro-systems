@@ -13,9 +13,13 @@ typedef char GLchar;
 #define APIENTRYP APIENTRY*
 typedef GLuint (APIENTRYP PFNGLCREATESHADERPROGRAMVPROC) (GLenum type, GLsizei count, const GLchar *const*strings);
 typedef void (APIENTRYP PFNGLUSEPROGRAMPROC) (GLuint program);
+typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONPROC) (GLuint program, const GLchar *name);
+typedef void (APIENTRYP PFNGLUNIFORM1FPROC) (GLint location, GLfloat v0);
 
 static PFNGLCREATESHADERPROGRAMVPROC glCreateShaderProgramv;
 static PFNGLUSEPROGRAMPROC glUseProgram;
+static PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
+static PFNGLUNIFORM1FPROC glUniform1f;
 
 static const PIXELFORMATDESCRIPTOR kPfd = {
 	.nSize = sizeof(kPfd),
@@ -33,7 +37,8 @@ static const DEVMODEA devmode = {
 };
 
 static const char *shader_source =
-"void main() { gl_FragColor = vec4(0., 1., 0., 0.); }";
+"uniform float t;\n"
+"void main() { gl_FragColor = vec4(0., 1., .5 + .5 * sin(t), 0.); }";
 
 int WinMainCRTStartup(void) {
 	ShowCursor(FALSE);
@@ -54,14 +59,19 @@ int WinMainCRTStartup(void) {
 
 	glCreateShaderProgramv = (void*)wglGetProcAddress("glCreateShaderProgramv");
 	glUseProgram = (void*)wglGetProcAddress("glUseProgram");
+	glGetUniformLocation = (void*)wglGetProcAddress("glGetUniformLocation");
+	glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 
 	const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_source);
 	glUseProgram(program);
+
+	const GLint t_loc = glGetUniformLocation(program, "t");
 
 	for (;;) {
 		if (GetAsyncKeyState(VK_ESCAPE))
 			break;
 
+		glUniform1f(t_loc, GetTickCount() / 1000.f);
 		glRects(-1, -1, 1, 1);
 		SwapBuffers(hdc);
 

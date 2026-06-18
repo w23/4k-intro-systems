@@ -306,7 +306,52 @@ const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_sour
 -v-
 
 ## Pass time
-TBD uniforms
+Use uniforms
+<!-- .element: class="fragment" data-fragment-index="1" -->
+```c++
+static const char *shader_source =
+"uniform float t;\n"
+"void main() { gl_FragColor = vec4(0., 1., .5+.5*sin(t), 0.); }";
+```
+<!-- .element: class="fragment" data-fragment-index="1" -->
+
+Locate
+<!-- .element: class="fragment" data-fragment-index="2" -->
+```c++ [3]
+glUseProgram(program);
+
+const GLint t_loc = glGetUniformLocation(program, "t");
+```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Set to current time in float seconds
+<!-- .element: class="fragment" data-fragment-index="3" -->
+```c++ [1]
+glUniform1f(t_loc, GetTickCount() / 1000.f);
+glRects(-1, -1, 1, 1);
+```
+<!-- .element: class="fragment" data-fragment-index="3" -->
+-v-
+
+## Remember to define and load
+```c++ [2-3, 7-8]
+typedef void (APIENTRYP PFNGLUSEPROGRAMPROC) (GLuint program);
+typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONPROC) (GLuint program, const GLchar *name);
+typedef void (APIENTRYP PFNGLUNIFORM1FPROC) (GLint location, GLfloat v0);
+
+static PFNGLCREATESHADERPROGRAMVPROC glCreateShaderProgramv;
+static PFNGLUSEPROGRAMPROC glUseProgram;
+static PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
+static PFNGLUNIFORM1FPROC glUniform1f;
+```
+
+```c++ [3-4]
+glCreateShaderProgramv = (void*)wglGetProcAddress("glCreateShaderProgramv");
+glUseProgram = (void*)wglGetProcAddress("glUseProgram");
+glGetUniformLocation = (void*)wglGetProcAddress("glGetUniformLocation");
+glUniform1f = (void*)wglGetProcAddress("glUniform1f");
+```
+### 833 bytes <!-- .element: class="fragment" -->
 ---
 
 ## Use real shader
