@@ -22,26 +22,14 @@ static PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 static PFNGLUNIFORM1FPROC glUniform1f;
 
 #ifdef _DEBUG
-#define GL_COMPILE_STATUS                 0x8B81
+#define GL_LINK_STATUS                    0x8B82
 
-typedef GLuint (APIENTRYP PFNGLCREATESHADERPROC) (GLenum type);
-typedef void (APIENTRYP PFNGLSHADERSOURCEPROC) (GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length);
-typedef void (APIENTRYP PFNGLCOMPILESHADERPROC) (GLuint shader);
-typedef void (APIENTRYP PFNGLGETSHADERIVPROC) (GLuint shader, GLenum pname, GLint *params);
-typedef void (APIENTRYP PFNGLGETSHADERINFOLOGPROC) (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
-typedef GLuint (APIENTRYP PFNGLCREATEPROGRAMPROC) (void);
-typedef void (APIENTRYP PFNGLATTACHSHADERPROC) (GLuint program, GLuint shader);
-typedef void (APIENTRYP PFNGLLINKPROGRAMPROC) (GLuint program);
+typedef void (APIENTRYP PFNGLGETPROGRAMIVPROC) (GLuint shader, GLenum pname, GLint *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMINFOLOGPROC) (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
 
 #define LIST_GL_FUNCS(X) \
-	X(PFNGLCREATESHADERPROC, glCreateShader) \
-	X(PFNGLSHADERSOURCEPROC, glShaderSource) \
-	X(PFNGLCOMPILESHADERPROC, glCompileShader) \
-	X(PFNGLGETSHADERIVPROC, glGetShaderiv) \
-	X(PFNGLGETSHADERINFOLOGPROC, glGetShaderInfoLog) \
-	X(PFNGLCREATEPROGRAMPROC, glCreateProgram) \
-	X(PFNGLATTACHSHADERPROC, glAttachShader) \
-	X(PFNGLLINKPROGRAMPROC, glLinkProgram)
+	X(PFNGLGETPROGRAMIVPROC, glGetProgramiv) \
+	X(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog) 
 
 #define X(t, n) static t n;
 LIST_GL_FUNCS(X)
@@ -416,6 +404,7 @@ int WinMainCRTStartup(void) {
 	glGetUniformLocation = (void*)wglGetProcAddress("glGetUniformLocation");
 	glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 
+	const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_source);
 #ifdef _DEBUG
 #define X(t, n) \
 	n = (t)(void*)wglGetProcAddress(#n); \
@@ -423,24 +412,16 @@ int WinMainCRTStartup(void) {
 	LIST_GL_FUNCS(X)
 #undef X
 
-	const GLint program = glCreateProgram();
 	{
-		const GLint shader = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(shader, 1, &shader_source, NULL);
-		glCompileShader(shader);
 		GLint success;
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+		glGetProgramiv(program, GL_LINK_STATUS, &success);
 		if (!success) {
 			char buf[1024];
-			glGetShaderInfoLog(shader, sizeof(buf)-1, NULL, buf);
+			glGetProgramInfoLog(program, sizeof(buf)-1, NULL, buf);
 			MessageBoxA(NULL, buf, "Shader error", MB_ICONERROR);
 			ExitProcess(0);
 		}
-		glAttachShader(program, shader);
-		glLinkProgram(program);
 	}
-#else
-	const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_source);
 #endif
 
 	glUseProgram(program);
