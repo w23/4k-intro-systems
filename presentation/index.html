@@ -22,9 +22,11 @@
 				<section data-markdown data-separator-vertical="-v-">
 					<textarea data-template>
 # Making your own 4k intro
-from scratch
+from scratch <!-- .element: class="fragment" -->
 
 No frameworks, no registration, no cloud subscriptions, no AI <!-- .element: class="fragment" -->
+
+<small>[2026-06-19, @party, Boston, US]</small>
 -v-
 
 ## Who am I?
@@ -48,6 +50,10 @@ This is a serious engineering talk
 - Single 32 bit exe file for Microsoft™ Windows®
 - No assets, no third party dependencies
 - Only uses what default Windows installation has
+	- plus any GPU drivers
+	- minus any included (clip) art or samples
+		- With the exception of builtin `gm.dls` MIDI "sample pack" for consensus reasons
+		<!-- .element: class="fragment" -->
 -v-
 
 ## Code overview
@@ -172,11 +178,12 @@ SetPixelFormat(hdc, ChoosePixelFormat(hdc, &kPfd), &kPfd);
 wglMakeCurrent(hdc, wglCreateContext(hdc));
 ```
 
-We have a current OpenGL 2.0 context now
+Now we can call OpenGL functions for drawing
+<!-- .element: class="fragment" -->
 -v-
 
 ## Event and paint loop
-```c++
+```c++ [1-13]
 // Clear to solid red color to check that it works
 glClearColor(255, 0, 0, 0);
 
@@ -190,6 +197,7 @@ for (;;) {
 	// Pump messages to tell Windows we're alive
 	PeekMessageA(NULL, 0, 0, 0, PM_REMOVE);
 }
+ExitProcess(0);
 ```
 -v-
 
@@ -220,46 +228,83 @@ static const DEVMODEA devmode = {
 };
 ```
 
-```c++
+```c++ [2-3]
+int WinMainCRTStartup(void) {
 	ShowCursor(FALSE);
 	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
+
+	const HWND hwnd = CreateWindowA(
 ```
 
 647 bytes
 <!-- .element: class="fragment" -->
 ---
 
-## Shader program
-Single fullscreen fragment shader
-Agenda:
-- Specify GLSL source as a string
-- Compile them into GL program object
-- Use program
-- Draw fullscreen quad
-- ?????
-- ❌
+## Fullscreen shader
+Define GLSL sources:
+```c++
+static const char *shader_source =
+"void main() { gl_FragColor = vec4(0., 1., 0., 0.); }";
+```
+
+Create and use program object:
+```c++
+const GLint program = glCreateShaderProgramv(
+	GL_FRAGMENT_SHADER, 1, &shader_source);
+glUseProgram(program);
+```
+
+Draw fullscreen quad:
+```c++ [1]
+glRects(-1, -1, 1, 1);
+SwapBuffers(hdc);
+```
+-v-
+
+## ?????
+<!-- .element: class="fragment" -->
+## ❌
 <!-- .element: class="fragment" -->
 ```
 error LNK: Cannot find symbol '_glUseProgram'
 ```
 <!-- .element: class="fragment" -->
 
--v-
-## 
-- Windows only supports OpenGL 1.1
-- Shaders are OpenGL 2.0
-- Need to manually load missing functions
-- Anything newer needs to be defined and loaded
+- Windows only provides OpenGL 1.1 lib and headers <!-- .element: class="fragment" -->
+- Shaders are defined in OpenGL 2.0 (2004) <!-- .element: class="fragment" -->
+- Anything newer needs to be defined <!-- .element: class="fragment" -->
+- Missing functions need to be loaded manually <!-- .element: class="fragment" -->
 - `wglGetProcAddress("glUseProgram");`
+<!-- .element: class="fragment" -->
 -v-
 
-TBD LOADING
+## Define and load
+```c++
+// These are defined in Khronos' glext.h
+#define GL_FRAGMENT_SHADER                0x8B30
+
+typedef char GLchar;
+#define APIENTRYP APIENTRY*
+typedef GLuint (APIENTRYP PFNGLCREATESHADERPROGRAMVPROC) (GLenum type, GLsizei count, const GLchar *const*strings);
+typedef void (APIENTRYP PFNGLUSEPROGRAMPROC) (GLuint program);
+
+static PFNGLCREATESHADERPROGRAMVPROC glCreateShaderProgramv;
+static PFNGLUSEPROGRAMPROC glUseProgram;
+```
+
+```c++ [3-4]
+wglMakeCurrent(hdc, hglrc);
+
+glCreateShaderProgramv = (void*)wglGetProcAddress("glCreateShaderProgramv");
+glUseProgram = (void*)wglGetProcAddress("glUseProgram");
+
+const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_source);
+```
+
+### 722 bytes
+<!-- .element: class="fragment" -->
 -v-
 
--v-
-
-TBD Screenshot and bytes
--v-
 ## Pass time
 TBD uniforms
 ---

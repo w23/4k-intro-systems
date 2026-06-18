@@ -21,13 +21,7 @@ static const DEVMODEA devmode = {
 	.dmPelsHeight = HEIGHT,
 };
 
-#ifdef _DEBUG
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nShowCmd) {
-	(void)hInstance; (void)hPrevInstance; (void)pCmdLine; (void)nShowCmd;
-#else
 int WinMainCRTStartup(void) {
-#endif
-
 	ShowCursor(FALSE);
 	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
 
