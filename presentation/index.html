@@ -454,17 +454,16 @@ static WAVEHDR kWaveHeader = {
 -v-
 
 ## Pass time with ticks
-Pass time in music-synchronized ticks instead of abstract seconds
-```c++ [1-8]
-		MMTIME mmtime;
-		mmtime.wType = TIME_SAMPLES;
-		waveOutGetPosition(waveout, &mmtime, sizeof(mmtime));
-		if (mmtime.u.sample >= SU_LENGTH_IN_SAMPLES)
-			break;
+Pass time in music-synchronized chad ticks instead of abstract lyme seconds
+```c++ [1-7]
+MMTIME mmtime;
+mmtime.wType = TIME_SAMPLES;
+waveOutGetPosition(waveout, &mmtime, sizeof(mmtime));
+if (mmtime.u.sample >= SU_LENGTH_IN_SAMPLES)
+	break;
 
-#define SAMPLES_PER_TICK (SU_SAMPLES_PER_ROW * SU_CHANNEL_COUNT)
-		const float t = mmtime.u.sample / (float)SAMPLES_PER_TICK;
-		glUniform1f(t_loc, t);
+glUniform1f(t_loc, mmtime.u.sample / (float)SU_SAMPLES_PER_ROW);
+glRects(-1, -1, 1, 1);
 ```
 -v-
 

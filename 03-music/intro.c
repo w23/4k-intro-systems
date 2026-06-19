@@ -118,9 +118,7 @@ int WinMainCRTStartup(void) {
 		if (mmtime.u.sample >= SU_LENGTH_IN_SAMPLES)
 			break;
 
-#define SAMPLES_PER_TICK (SU_SAMPLES_PER_ROW * SU_CHANNEL_COUNT)
-		const float t = mmtime.u.sample / (float)SAMPLES_PER_TICK;
-		glUniform1f(t_loc, t);
+		glUniform1f(t_loc, mmtime.u.sample / (float)SU_SAMPLES_PER_ROW);
 		glRects(-1, -1, 1, 1);
 		SwapBuffers(hdc);
 
