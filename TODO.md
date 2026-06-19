@@ -19,11 +19,11 @@
     - [x] read time from waveout
     - [x] slides
 - [ ] 04 shader minifier
-    - [ ] take bigger shader
+    - [x] take bigger shader
     - [ ] read from file
     - [ ] debug messages
-    - [ ] minifier in build step
-    - [ ] slides
+    - [x] minifier in build step
+    - [x] slides
 
 - [ ] more tricks and further work
     - [ ] what tricks, a list
