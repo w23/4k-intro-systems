@@ -1,5 +1,4 @@
 #version 130
-#error
 uniform float t;
 const vec2 R = vec2(1920.,1080.);
 

@@ -582,6 +582,12 @@ const GLint t_loc = glGetUniformLocation(program, VAR_t);
 ## how to intro
 ### THE END
 #### Thanks!
+
+Go make an intro now
+<!-- .element: class="fragment" -->
+
+Deadline is tomorrow 5pm
+<!-- .element: class="fragment" -->
 ---
 
 ## Extras: Alternatives
@@ -596,12 +602,116 @@ const GLint t_loc = glGetUniformLocation(program, VAR_t);
 	- ...
 
 ---
-## Bonus: debug mode
-TBD
-Homework: reload shader automatically in debug mode, making a live coding tool
+## Bonus: debug build
+Why:
+- Can attach debugger
+- Checks for successful shader compilation
+	- majority of errors happen here during development
+
+How:
+- Use regular linker
+- Add bunch cflags like `/Od` and `/DEBUG`
+-v-
+
+## Build debug script
+sointu and minifier steps are the same
+
+```bat [3-10]
+..\shader_minifier.exe --format c-variables -o shader.h shader.frag || exit /b 6
+
+cl ^
+	/Feintro-debug.exe ^
+	/Z7 /DEBUG /Od /JMC /D_DEBUG /GS- ^
+	intro.c ^
+	/link ^
+		music.obj ^
+		user32.lib opengl32.lib gdi32.lib winmm.lib ^
+		/subsystem:windows /DEBUG
+```
+-v-
+
+## Sources support
+- Detect using `#ifdef _DEBUG`
+- Use regular `WinMain` entry point for debug
+
+```c++ [1-4,8]
+#ifdef _DEBUG
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nShowCmd) {
+	(void)hInstance; (void)hPrevInstance; (void)pCmdLine; (void)nShowCmd;
+#else
+int WinMainCRTStartup(void) {
+	ShowCursor(FALSE);
+	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
+#endif
+```
+-v-
+
+## Check shader
+- Check for `GL_LINK_STATUS` on the program.
+- Report `glGetProgramInfoLog()`
+
+```c++
+	const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag);
+#ifdef _DEBUG
+	GLint success;
+	glGetProgramiv(program, GL_LINK_STATUS, &success);
+	if (!success) {
+		char buf[1024];
+		glGetProgramInfoLog(program, sizeof(buf)-1, NULL, buf);
+		MessageBoxA(NULL, buf, "Shader error", MB_ICONERROR);
+		ExitProcess(0);
+	}
+#endif // #ifdef _DEBUG
+```
+-v-
+
+## Moar loading funcs
+
+```c++
+#ifdef _DEBUG
+#define GL_LINK_STATUS                    0x8B82
+
+typedef void (APIENTRYP PFNGLGETPROGRAMIVPROC) (GLuint shader, GLenum pname, GLint *params);
+typedef void (APIENTRYP PFNGLGETPROGRAMINFOLOGPROC) (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
+// ...
+```
+-v-
+
+## Moar loading funcs II
+Use X-macro!
+
+```c++
+#define LIST_GL_FUNCS(X) \
+	X(PFNGLGETPROGRAMIVPROC, glGetProgramiv) \
+	X(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog) 
+```
+
+And then
+```c++
+#define X(t, n) static t n;
+LIST_GL_FUNCS(X)
+#undef X
+#endif // #ifdef _DEBUG
+```
+-v-
+
+## Moar loading funcs III
+Load:
+```c++
+#define X(t, n) \
+	n = (t)(void*)wglGetProcAddress(#n); \
+	if (!n) MessageBoxA(NULL, #n, "wglGetProcAddress", MB_ICONERROR);
+	LIST_GL_FUNCS(X)
+#undef X
+```
+
+Hint: use that for all funcs in a real prod
+
+Homework: reload shader automatically in debug mode, making it an accidental live coding tool!
+---
 
 ---
-Bonus: more compression tricks
+## Bonus: more compression tricks
 TBD
 - Slow mode: more aggressive crinkler args
 - Section reordering
