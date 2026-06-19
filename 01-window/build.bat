@@ -3,7 +3,7 @@ setlocal
 
 call ..\setupenv.bat || exit /b 1
 
-cl intro.c
+cl /c intro.c
 
 ..\crinkler.exe ^
 	intro.obj ^

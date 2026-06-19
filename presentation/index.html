@@ -72,7 +72,7 @@ This is a serious engineering talk
 - `build.bat` file with
 	- [Shader minifier](https://github.com/laurentlb/shader-minifier) for GLSL minification
 	- `cl.exe /Os intro.c`
-	- `nasm sointu.asm` TBD
+	- `nasm music.asm`
 	- [Crinkler](https://github.com/runestubbe/Crinkler) for linking and compression
 -v-
 
@@ -128,7 +128,7 @@ int WinMainCRTStartup(void) {
 
 `build-compress.bat` <!-- .element: class="fragment" data-fragment-index="2" -->
 ```bat
-cl empty-nocrt.c
+cl /c empty-nocrt.c
 
 ..\crinkler.exe ^
 	empty-nocrt.obj kernel32.lib user32.lib ^
@@ -205,7 +205,7 @@ ExitProcess(0);
 `build.bat`
 
 ```bat
-cl intro.c
+cl /c intro.c
 
 ..\crinkler.exe ^
 	intro.obj ^
@@ -357,6 +357,33 @@ glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 ### 843 bytes <!-- .element: class="fragment" -->
 ---
 
+## Musics
+How to have music for 4k in 7 easy steps:
+1. open sointu tracker
+2. ?????
+3. you have an `music.yml` file
+```bat
+.\sointu-compile.exe -o music -e asm,h -arch=386 music.yml
+```
+4. receive `music.asm` and `music.h`
+5. compile music.obj and link with it
+6. start synth thread
+7. play it
+
+-v-
+
+## waveOut
+TBD struct, create, start
+-v-
+
+## Time in ticks
+lyme tick.jpg
+TBD size
+
+-v-
+Demo time
+---
+
 ## Use real shader
 TBD make a good example
 TBD how many bytes?! Remember audio budget?
@@ -372,22 +399,6 @@ TBD #include
 ## Minified
 TBD what it looks like
 TBD size
----
-## Musics
-TBD sointu, assets, build step
-TBD create thread
--v-
-
-## waveOut
-TBD struct, create, start
--v-
-
-## Time in ticks
-lyme tick.jpg
-TBD size
-
--v-
-Demo time
 ---
 
 ## TBD further notes
