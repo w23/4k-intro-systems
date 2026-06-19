@@ -12,18 +12,18 @@
     - [ ] explicit debug mode
     - [x] pass time
     - [x] slides
+- [ ] 03 music
+    - [ ] make music in sointu in 10 minutes
+    - [x] compile and link with sointu
+    - [x] start thread and playback
+    - [x] read time from waveout
+    - [x] slides
 - [ ] 04 shader minifier
     - [ ] take bigger shader
     - [ ] read from file
     - [ ] debug messages
     - [ ] minifier in build step
     - [ ] slides
-- [ ] music
-    - [ ] make music in sointu in 10 minutes
-    - [x] compile and link with sointu
-    - [x] start thread and playback
-    - [x] read time from waveout
-    - [x] slides
 
 - [ ] more tricks and further work
     - [ ] what tricks, a list

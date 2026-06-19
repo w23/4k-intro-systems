@@ -359,23 +359,16 @@ glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 
 ## Musics
 How to have music for 4k in 3 easy steps:
-0. Get sointu from https://github.com/vsariola/sointu/
-1. open sointu tracker
-2. ?????
-3. you have an `music.yml` file
-```bat
-.\sointu-compile.exe -o music -e asm,h -arch=386 music.yml
-```
-4. receive `music.asm` and `music.h`
+1. Get sointu from https://github.com/vsariola/sointu/
+2. open sointu tracker
+3. ?????
+4. sointu-compile `yml` file and receive `asm` and `h` files
 5. compile music.obj and link with it
 6. start synth thread
 7. play the generated buffer
 
 -v-
-## Ingest sointu track
-in three easy steps
-
-Compile `music.yml`
+## Compile sointu track
 ```bat
 ..\sointu-compile.exe -o music -e h,asm -arch=386 music.yml
 ```
@@ -384,7 +377,7 @@ Output:
 - `music.asm` with synth and track builtin
 -v-
 
-## Compile music
+## Assemble music
 Fixup alignment and compile
 ```bat
 powershell -Command "(gc music.asm) -replace 'align=256', 'align=64' | Out-File -encoding ASCII music.asm"
@@ -476,14 +469,11 @@ Pass time in music-synchronized ticks instead of abstract seconds
 -v-
 
 ## Link with libs and deps
-Fixup msvc security shenanigans
-```bat
-cl /c /GS- intro.c
-```
-
-Link with `music.obj` and `winmm.lib`
-```bat [3-6]
+Fixup msvc security shenanigans and link with `music.obj` and `winmm.lib`
+```bat [3-8]
 ..\nasm.exe -fwin32 -o music.obj music.asm
+
+cl /c /GS- intro.c
 
 ..\crinkler.exe ^
 	intro.obj music.obj ^
@@ -495,8 +485,12 @@ Link with `music.obj` and `winmm.lib`
 
 ## Use real shader
 Lets take a real shader from a real demo
+```c++
+```
+
 TBD make a good example
-TBD how many bytes?! Remember audio budget?
+TBD how many bytes?!
+TBD report
 TBD report screenshot
 
 -v-
