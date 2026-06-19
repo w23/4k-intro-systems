@@ -114,7 +114,7 @@ cl /Feempty.exe empty.c /link /subsystem:windows
 -v-
 
 ## Compressed and optimized
-No C library, and using Crinkler
+No C library, and using Crinkler (https://crinkler.net/)
 
 `empty-nocrt.c` <!-- .element: class="fragment" data-fragment-index="1" -->
 ```c++
@@ -171,6 +171,7 @@ static const PIXELFORMATDESCRIPTOR kPfd = {
 	.cColorBits = 24,
 };
 ```
+<!-- .element: class="fragment" -->
 
 ```c++
 const HDC hdc = GetDC(hwnd);
@@ -227,6 +228,7 @@ static const DEVMODEA devmode = {
 	.dmPelsHeight = HEIGHT,
 };
 ```
+<!-- .element: class="fragment" -->
 
 ```c++ [2-3]
 int WinMainCRTStartup(void) {
@@ -241,24 +243,27 @@ int WinMainCRTStartup(void) {
 ---
 
 ## Fullscreen shader
-Define GLSL sources:
+Define GLSL sources <!-- .element: class="fragment" data-fragment-index="1" -->
 ```c++
 static const char *shader_frag =
 "void main() { gl_FragColor = vec4(0., 1., 0., 0.); }";
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
-Create and use program object:
+Create and use program object <!-- .element: class="fragment" data-fragment-index="2" -->
 ```c++
 const GLint program = glCreateShaderProgramv(
 	GL_FRAGMENT_SHADER, 1, &shader_frag);
 glUseProgram(program);
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
 
-Draw fullscreen quad:
+Draw fullscreen quad <!-- .element: class="fragment" data-fragment-index="3" -->
 ```c++ [1]
 glRects(-1, -1, 1, 1);
 SwapBuffers(hdc);
 ```
+<!-- .element: class="fragment" data-fragment-index="3" -->
 -v-
 
 ## ?????
@@ -291,6 +296,7 @@ typedef void (APIENTRYP PFNGLUSEPROGRAMPROC) (GLuint program);
 static PFNGLCREATESHADERPROGRAMVPROC glCreateShaderProgramv;
 static PFNGLUSEPROGRAMPROC glUseProgram;
 ```
+<!-- .element: class="fragment" -->
 
 ```c++ [3-4]
 wglMakeCurrent(hdc, hglrc);
@@ -300,6 +306,7 @@ glUseProgram = (void*)wglGetProcAddress("glUseProgram");
 
 const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag);
 ```
+<!-- .element: class="fragment" -->
 
 ### 722 bytes
 <!-- .element: class="fragment" -->
@@ -361,20 +368,37 @@ glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 How to have music for 4k in 3 easy steps:
 1. Get sointu from https://github.com/vsariola/sointu/
 2. open sointu tracker
-3. ?????
-4. sointu-compile `yml` file and receive `asm` and `h` files
-5. compile music.obj and link with it
-6. start synth thread
-7. play the generated buffer
+3. ????? <!-- .element: class="fragment" -->
+4. sointu-compile yml file and receive asm and h files <!-- .element: class="fragment" -->
+5. compile music.obj and link with it <!-- .element: class="fragment" -->
+6. start synth thread <!-- .element: class="fragment" -->
+7. play the generated buffer <!-- .element: class="fragment" -->
 
 -v-
 ## Compile sointu track
 ```bat
 ..\sointu-compile.exe -o music -e h,asm -arch=386 music.yml
 ```
+
 Output:
 - `music.h` with metadata (BPM, length, etc)
 - `music.asm` with synth and track builtin
+-v-
+
+## `music.h`
+```c++
+// ...
+#define SU_CHANNEL_COUNT        2
+#define SU_LENGTH_IN_SAMPLES    6213632
+// ...
+#define SU_SAMPLE_RATE          44100
+// ...
+#define SU_SAMPLES_PER_ROW      (SU_SAMPLE_RATE*60/(SU_BPM*SU_ROWS_PER_BEAT))
+// ...
+void SU_CALLCONV su_render_song(SUsample *buffer);
+void SU_CALLCONV su_load_gmdls();
+// ...
+```
 -v-
 
 ## Assemble music
@@ -479,7 +503,9 @@ cl /c /GS- intro.c
 	kernel32.lib user32.lib opengl32.lib gdi32.lib winmm.lib ^
 	/subsystem:windows /OUT:intro.exe /CRINKLER
 ```
-### 2456 bytes 
+<!-- .element: class="fragment" -->
+
+### 2456 bytes  <!-- .element: class="fragment" -->
 ---
 
 ## Use real shader
@@ -518,8 +544,9 @@ https://github.com/laurentlb/shader-minifier
 ```bat
 .\shader_minifier.exe --format c-variables -o shader.h shader.frag || exit /b 6
 ```
+<!-- .element: class="fragment" data-fragment-index="1" -->
 
-Will generate shader.h, like:
+Will generate shader.h, like: <!-- .element: class="fragment" data-fragment-index="2" -->
 ```c++
 // Generated with Shader Minifier 1.6.0 (https://github.com/laurentlb/Shader_Minifier/)
 #ifndef SHADER_H_
@@ -528,8 +555,13 @@ Will generate shader.h, like:
 
 const char *shader_frag =
  "#version 130\n"
-...
+//...
+
 ```
+<!-- .element: class="fragment" data-fragment-index="2" -->
+
+Note the `VAR_t` -- minifier can change uniform `"t"` name.
+<!-- .element: class="fragment" data-fragment-index="3" -->
 -v-
 
 # Load minified shader
@@ -538,17 +570,18 @@ Instead of embedding sources, just
 #include "shader.h"
 ```
 
-Note the `VAR_t` -- minifier can change uniform `"t"` name.
+Locate the `VAR_t`:
 ```c++
 const GLint t_loc = glGetUniformLocation(program, VAR_t);
 ```
 
 ### Now it is 3751, well below the limit <!-- .element: class="fragment" -->
-#### shader is below 1.5k <!-- .element: class="fragment" -->
+#### shader itself is below 1.5k <!-- .element: class="fragment" -->
 ---
-# THE END
-
-Thanks!
+# Now you know
+## how to intro
+### THE END
+#### Thanks!
 ---
 
 ## Extras: Alternatives
@@ -567,7 +600,8 @@ Thanks!
 TBD
 Homework: reload shader automatically in debug mode, making a live coding tool
 
---- Bonus: more compression tricks
+---
+Bonus: more compression tricks
 TBD
 - Slow mode: more aggressive crinkler args
 - Section reordering
