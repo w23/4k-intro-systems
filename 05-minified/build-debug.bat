@@ -7,11 +7,14 @@ call ..\setupenv.bat || exit /b 1
 
 REM fixup alignment
 powershell -Command "(gc music.asm) -replace 'align=256', 'align=64' | Out-File -encoding ASCII music.asm" || exit /b 4
+
 ..\nasm.exe -fwin32 -o music.obj music.asm || exit /b 5
 
-cl /c /GS- intro.c || exit /b 2
-
-..\crinkler.exe ^
-	intro.obj music.obj ^
-	kernel32.lib user32.lib opengl32.lib gdi32.lib winmm.lib ^
-	/subsystem:windows /OUT:intro.exe /CRINKLER /REPORT:report.html
+cl ^
+	/Feintro-debug.exe ^
+	/Z7 /DEBUG /Od /JMC /D_DEBUG /GS- ^
+	intro.c ^
+	/link ^
+		music.obj ^
+		user32.lib opengl32.lib gdi32.lib winmm.lib ^
+		/subsystem:windows /DEBUG

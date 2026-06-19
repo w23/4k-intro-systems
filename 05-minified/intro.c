@@ -61,9 +61,7 @@ static WAVEHDR kWaveHeader = {
 	.dwFlags = WHDR_PREPARED,
 };
 
-static const char *shader_source =
-"uniform float t;\n"
-"void main() { gl_FragColor = vec4(0., 1., .5 + .5 * sin(t), 0.); }";
+#include "shader.h"
 
 int WinMainCRTStartup(void) {
 	ShowCursor(FALSE);
@@ -94,11 +92,11 @@ int WinMainCRTStartup(void) {
 	glGetUniformLocation = (void*)wglGetProcAddress("glGetUniformLocation");
 	glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 
-	const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_source);
+	const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag);
 
 	glUseProgram(program);
 
-	const GLint t_loc = glGetUniformLocation(program, "t");
+	const GLint t_loc = glGetUniformLocation(program, VAR_t);
 
 	HWAVEOUT waveout;
 	waveOutOpen(&waveout, WAVE_MAPPER, &kWaveFormat, 0, 0, 0);

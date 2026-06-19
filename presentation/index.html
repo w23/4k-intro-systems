@@ -243,14 +243,14 @@ int WinMainCRTStartup(void) {
 ## Fullscreen shader
 Define GLSL sources:
 ```c++
-static const char *shader_source =
+static const char *shader_frag =
 "void main() { gl_FragColor = vec4(0., 1., 0., 0.); }";
 ```
 
 Create and use program object:
 ```c++
 const GLint program = glCreateShaderProgramv(
-	GL_FRAGMENT_SHADER, 1, &shader_source);
+	GL_FRAGMENT_SHADER, 1, &shader_frag);
 glUseProgram(program);
 ```
 
@@ -298,7 +298,7 @@ wglMakeCurrent(hdc, hglrc);
 glCreateShaderProgramv = (void*)wglGetProcAddress("glCreateShaderProgramv");
 glUseProgram = (void*)wglGetProcAddress("glUseProgram");
 
-const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_source);
+const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_frag);
 ```
 
 ### 722 bytes
@@ -309,7 +309,7 @@ const GLint program = glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &shader_sour
 Use uniforms
 <!-- .element: class="fragment" data-fragment-index="1" -->
 ```c++
-static const char *shader_source =
+static const char *shader_frag =
 "uniform float t;\n"
 "void main() { gl_FragColor = vec4(0., 1., .5+.5*sin(t), 0.); }";
 ```
@@ -483,47 +483,97 @@ cl /c /GS- intro.c
 ---
 
 ## Use real shader
-Lets take a real shader from a real demo
-```c++
+```c++ [2-12]
+static const char *shader_frag =
+"#version 130\n"
+"uniform float t;\n"
+"const vec2 R = vec2(1920.,1080.);\n"
+"\n"
+"const float S = 4.;\n"
+"float hash1(float x){return fract(sin(x)*265871.1723);}\n"
+"float hash2(vec2 x){return hash1(dot(x,vec2(11.,313.)));}\n"
+
+// over 300 lines
+
+"	gl_FragColor = vec4(pow(C,vec3(1./2.2)), primary_length);\n"
+"}\n"
+;
 ```
 
-TBD make a good example
-TBD how many bytes?!
-TBD report
-TBD report screenshot
-
+It builds and runs
+### But it's 4885 bytes! <!-- .element: class="fragment" -->
+#### 2500 of which are taken by shader <!-- .element: class="fragment" -->
 -v-
+## Report
+```bat [4]
+..\crinkler.exe ^
+	intro.obj music.obj ^
+	kernel32.lib user32.lib opengl32.lib gdi32.lib winmm.lib ^
+	/subsystem:windows /OUT:intro.exe /CRINKLER /REPORT:report.html
+```
+---
+
 ## Enter the Shader Minifier
-TBD get it
-TBD build step
-TBD #include
+https://github.com/laurentlb/shader-minifier
+```bat
+.\shader_minifier.exe --format c-variables -o shader.h shader.frag || exit /b 6
+```
 
+Will generate shader.h, like:
+```c++
+// Generated with Shader Minifier 1.6.0 (https://github.com/laurentlb/Shader_Minifier/)
+#ifndef SHADER_H_
+# define SHADER_H_
+# define VAR_t "v"
+
+const char *shader_frag =
+ "#version 130\n"
+...
+```
 -v-
-## Minified
-TBD what it looks like
-TBD size
----
 
-## TBD further notes
-TBD
-- slow mode, extra flags
-- section reordering
-- extra compiler args
----
+# Load minified shader
+Instead of embedding sources, just
+```c++
+#include "shader.h"
+```
 
-## Extras: Live shader loading
-TBD file reading, shader info log, etc
+Note the `VAR_t` -- minifier can change uniform `"t"` name.
+```c++
+const GLint t_loc = glGetUniformLocation(program, VAR_t);
+```
+
+### Now it is 3751, well below the limit <!-- .element: class="fragment" -->
+#### shader is below 1.5k <!-- .element: class="fragment" -->
+---
+# THE END
+
+Thanks!
 ---
 
 ## Extras: Alternatives
 - Pure assembly, no MSVC, framework: [BEPCT4k](https://github.com/w23/bepct4k)
-	- Used in one form or another in all jetlag 4k intros since ~2019
+	- Used in all jetlag 4k intros since ~2019
 - Music:
 	- 4klang (where sointu forked off)
 	- oidos
 	- clinkster
+	- just write GLSL like in shadertoy
+	- custom C/asm synth
 	- ...
 
+---
+## Bonus: debug mode
+TBD
+Homework: reload shader automatically in debug mode, making a live coding tool
+
+--- Bonus: more compression tricks
+TBD
+- Slow mode: more aggressive crinkler args
+- Section reordering
+- Compiler args
+- More compact function loading
+- Assembly
 					</textarea>
 				</section>
 

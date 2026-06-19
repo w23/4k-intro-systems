@@ -9,6 +9,8 @@ REM fixup alignment
 powershell -Command "(gc music.asm) -replace 'align=256', 'align=64' | Out-File -encoding ASCII music.asm" || exit /b 4
 ..\nasm.exe -fwin32 -o music.obj music.asm || exit /b 5
 
+..\shader_minifier.exe --format c-variables -o shader.h shader.frag || exit /b 6
+
 cl /c /GS- intro.c || exit /b 2
 
 ..\crinkler.exe ^
