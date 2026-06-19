@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <gl/GL.h>
-#include <mmreg.h>
 
+#include <mmreg.h>
 #include "music.h"
 
 #define WIDTH 1920

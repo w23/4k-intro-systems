@@ -358,7 +358,8 @@ glUniform1f = (void*)wglGetProcAddress("glUniform1f");
 ---
 
 ## Musics
-How to have music for 4k in 7 easy steps:
+How to have music for 4k in 3 easy steps:
+0. Get sointu from https://github.com/vsariola/sointu/
 1. open sointu tracker
 2. ?????
 3. you have an `music.yml` file
@@ -368,23 +369,132 @@ How to have music for 4k in 7 easy steps:
 4. receive `music.asm` and `music.h`
 5. compile music.obj and link with it
 6. start synth thread
-7. play it
+7. play the generated buffer
 
 -v-
+## Ingest sointu track
+in three easy steps
 
-## waveOut
-TBD struct, create, start
+Compile `music.yml`
+```bat
+..\sointu-compile.exe -o music -e h,asm -arch=386 music.yml
+```
+Output:
+- `music.h` with metadata (BPM, length, etc)
+- `music.asm` with synth and track builtin
 -v-
 
-## Time in ticks
-lyme tick.jpg
-TBD size
+## Compile music
+Fixup alignment and compile
+```bat
+powershell -Command "(gc music.asm) -replace 'align=256', 'align=64' | Out-File -encoding ASCII music.asm"
 
+..\nasm.exe -fwin32 -o music.obj music.asm
+```
+
+Now you can link with `music.obj`
 -v-
-Demo time
+
+## Synthesize
+Include files and declare storage for the entire track
+```c++
+#include <mmreg.h>
+#include "music.h"
+
+static SUsample sound_buffer[SU_LENGTH_IN_SAMPLES * SU_CHANNEL_COUNT];
+```
+
+Start the synth thread early
+```c++ [3-9]
+	ChangeDisplaySettingsA((DEVMODEA*)&devmode, CDS_FULLSCREEN);
+
+	// Required if track uses gm.dls samples
+#ifdef SU_LOAD_GMDLS
+	su_load_gmdls();
+#endif
+
+	// Give synth thread a head start
+	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)su_render_song, sound_buffer, 0, NULL);
+```
+-v-
+
+## Use waveOut for putting the wave out
+Use old winmm API to cheaply initialize sound ouput:
+```c++ [3-5]
+const GLint t_loc = glGetUniformLocation(program, "t");
+
+HWAVEOUT waveout;
+waveOutOpen(&waveout, WAVE_MAPPER, &kWaveFormat, 0, 0, 0);
+waveOutWrite(waveout, &kWaveHeader, sizeof(kWaveHeader));
+
+for (;;) {
+```
+-v-
+
+## Define format 
+Use `music.h` metadata constants:
+```c++
+static const WAVEFORMATEX kWaveFormat = {
+#ifdef SU_SAMPLE_FLOAT
+	.wFormatTag = WAVE_FORMAT_IEEE_FLOAT,
+#else
+	.wFormatTag = WAVE_FORMAT_PCM,
+#endif
+	.nChannels = SU_CHANNEL_COUNT,
+	.nSamplesPerSec = SU_SAMPLE_RATE,
+	.nAvgBytesPerSec = SU_SAMPLE_SIZE * SU_SAMPLE_RATE * SU_CHANNEL_COUNT,
+	.nBlockAlign = SU_SAMPLE_SIZE * SU_CHANNEL_COUNT,
+	.wBitsPerSample = SU_SAMPLE_SIZE * 8,
+	.cbSize = 0, // no extras
+};
+```
+-v-
+
+## Provide sound buffer header 
+```c++
+static WAVEHDR kWaveHeader = {
+	.lpData = (LPSTR)sound_buffer,
+	.dwBufferLength = sizeof(sound_buffer),
+	.dwFlags = WHDR_PREPARED,
+};
+```
+-v-
+
+## Pass time with ticks
+Pass time in music-synchronized ticks instead of abstract seconds
+```c++ [1-8]
+		MMTIME mmtime;
+		mmtime.wType = TIME_SAMPLES;
+		waveOutGetPosition(waveout, &mmtime, sizeof(mmtime));
+		if (mmtime.u.sample >= SU_LENGTH_IN_SAMPLES)
+			break;
+
+#define SAMPLES_PER_TICK (SU_SAMPLES_PER_ROW * SU_CHANNEL_COUNT)
+		const float t = mmtime.u.sample / (float)SAMPLES_PER_TICK;
+		glUniform1f(t_loc, t);
+```
+-v-
+
+## Link with libs and deps
+Fixup msvc security shenanigans
+```bat
+cl /c /GS- intro.c
+```
+
+Link with `music.obj` and `winmm.lib`
+```bat [3-6]
+..\nasm.exe -fwin32 -o music.obj music.asm
+
+..\crinkler.exe ^
+	intro.obj music.obj ^
+	kernel32.lib user32.lib opengl32.lib gdi32.lib winmm.lib ^
+	/subsystem:windows /OUT:intro.exe /CRINKLER
+```
+### 2456 bytes 
 ---
 
 ## Use real shader
+Lets take a real shader from a real demo
 TBD make a good example
 TBD how many bytes?! Remember audio budget?
 TBD report screenshot
